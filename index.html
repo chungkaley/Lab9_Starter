@@ -2,6 +2,13 @@
 <html lang="en">
 
 <head>
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
+  <script>
+  window.TrackJS && TrackJS.install({
+    token: "e24d78664be048e4bc3a3a00ec934793",
+    application: "lab-9-calculator"
+  });
+  </script>
   <meta charset="UTF-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -103,6 +110,7 @@
         this.url = url;
       }
     }
+    
     // Step 5 - The Global Error handler and 3rd Party Tracking
   window.onerror = function(message, source, lineno, colno, error) {   
       if (error) {
@@ -132,6 +140,12 @@
         if (firstNum === '' || secondNum === '') {
           throw new ValidationError('Both fields are required');
         }
+        if (operator === '/') {
+          throw new NetworkError(
+            'Failed to reach calculation server',
+            'https://api.example.com/calc'
+          );
+        }
         let result = eval(`${firstNum} ${operator} ${secondNum}`);
         if (!isFinite(result)) {
           throw new RangeError('Cannot divide by zero');
@@ -141,6 +155,9 @@
         if (e instanceof ValidationError) {
           console.error(`[ValidationError] ${e.message}`);
           output.innerHTML = `ValidationError: ${e.message}`;
+        } else if (e instanceof NetworkError) {         
+          console.error(`[NetworkError] ${e.message} — URL: ${e.url}`);
+          output.innerHTML = `NetworkError: ${e.message}`;
         } else if (e instanceof RangeError) {
           console.error(`[RangeError] ${e.message}`);
           output.innerHTML = `RangeError: ${e.message}`;
@@ -222,13 +239,12 @@
       const xmlDoc = parser.parseFromString(`<button>Console dirxml</button>`, "text/xml");
       console.dirxml(xmlDoc.documentElement);
     });
-
     //console.group
     errorBtns[8].addEventListener("click", () => {
       console.group("User Report");
       console.log("Users:", sampleData.length);
-      console.log("Roles:");
-      sampleData.forEach(user => console.log(user.role));
+      console.log("Names:");
+      sampleData.forEach(user => console.log(user.name));  
     });
     
     //console group end
