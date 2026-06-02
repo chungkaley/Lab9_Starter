@@ -88,20 +88,189 @@
   </main>
 
   <script>
+    //Step 4 - Throw and Custom Errors
+    class ValidationError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'ValidationError';
+      }
+    }
+
+    class NetworkError extends Error {
+      constructor(message, url) {
+        super(message);
+        this.name = 'NetworkError';
+        this.url = url;
+      }
+    }
+    // Step 5 - The Global Error handler and 3rd Party Tracking
+  window.onerror = function(message, source, lineno, colno, error) {   
+      if (error) {
+        console.error(error);
+      } else {
+        console.error(`${message} at line ${lineno}`);
+      }
+      return true;
+    };
+
+    window.addEventListener("unhandledrejection", function(event) {
+      console.error(`[Unhandled Promise Rejection] ${event.reason?.message || event.reason}`);
+      event.preventDefault();
+    });
+
+    //Step 3 - Trying Try/Catch
     let form = document.querySelector('form');
     form.addEventListener('submit', e => {
       e.preventDefault();
       let output = document.querySelector('output');
+
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+
+      try {
+        if (firstNum === '' || secondNum === '') {
+          throw new ValidationError('Both fields are required');
+        }
+        let result = eval(`${firstNum} ${operator} ${secondNum}`);
+        if (!isFinite(result)) {
+          throw new RangeError('Cannot divide by zero');
+        }
+        output.innerHTML = result;
+      } catch (e) {
+        if (e instanceof ValidationError) {
+          console.error(`[ValidationError] ${e.message}`);
+          output.innerHTML = `ValidationError: ${e.message}`;
+        } else if (e instanceof RangeError) {
+          console.error(`[RangeError] ${e.message}`);
+          output.innerHTML = `RangeError: ${e.message}`;
+        } else {
+          console.error('[Unknown Error]', e);
+          output.innerHTML = 'Unknown error';
+        }
+      } finally {
+        console.log('[finally] Attempt finished.');
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
     // Start your code here
     // You may move this JS to another file if you wish
+    //Step 2 -  Adding Buttons for Console Testing
+
+    const sampleData = [
+      { name: 'Software Engineer',  num: '110'  },
+      { name: 'Programming Language', num: '130' },
+      { name: 'Advanced Sfotware',   num: '112' },
+    ];
+
+    //console.log
+    errorBtns[0].addEventListener('click', () => {
+      console.log('Console Log Demo');
+    });
+
+    //console.error
+    errorBtns[1].addEventListener('click', () => {
+      console.error('Console Error Demo');
+    });
+    
+    //console.count
+    errorBtns[2].addEventListener("click", () => {
+      console.count("Count Button");
+    });
+
+    //console.warn
+    errorBtns[3].addEventListener("click", () => {
+      console.warn("Console Warn Button");
+    });
+
+    //console.assert
+    errorBtns[4].addEventListener("click", () => {
+      let firstNum1 = document.querySelector("#first-num").value;
+      let secondNum2 = document.querySelector("#second-num").value;
+
+      if (firstNum1 === "") {
+        firstNum1 = 2;
+      }
+
+      if (secondNum2 === "") {
+        secondNum2 = 3;
+      }
+
+      console.assert(
+        firstNum1 == secondNum2,
+        {
+          number: firstNum1,
+          errorMsg: `The number does not equal ${secondNum2}`
+        }
+      );
+    });
+
+    //console.clear
+    errorBtns[5].addEventListener("click", () => {
+      console.clear();
+    });
+
+    //console.dir
+    errorBtns[6].addEventListener("click", () => {
+      console.dir(errorBtns[6]); 
+    });
+    //console.dirxml
+    errorBtns[7].addEventListener("click", () => {
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(`<button>Console dirxml</button>`, "text/xml");
+      console.dirxml(xmlDoc.documentElement);
+    });
+
+    //console.group
+    errorBtns[8].addEventListener("click", () => {
+      console.group("User Report");
+      console.log("Users:", sampleData.length);
+      console.log("Roles:");
+      sampleData.forEach(user => console.log(user.role));
+    });
+    
+    //console group end
+    errorBtns[9].addEventListener("click", () => {
+      console.groupEnd();
+    });
+
+    //console.table
+    errorBtns[10].addEventListener("click", () => {
+      console.table(sampleData);
+    });
+    
+    //console.time
+    errorBtns[11].addEventListener("click", () => {
+      console.time("Timer Button ");
+    });
+
+    //console.time
+    errorBtns[12].addEventListener("click", () => {
+      console.timeEnd("Timer Button ");
+    });
+
+    //console.trace
+    errorBtns[13].addEventListener("click", () => {
+      function deep() {
+        deeper();
+      }
+      function deeper() {
+        deepest();
+      }
+      function deepest() {
+        console.trace();
+      }
+      deep();
+    });
+
+    errorBtns[14].addEventListener("click", () => {
+      setTimeout(() => {
+        nonexistentFunction();
+      }, 0);
+    });
+
   </script>
 </body>
 
